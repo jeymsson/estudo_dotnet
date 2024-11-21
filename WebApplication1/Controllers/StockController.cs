@@ -59,5 +59,17 @@ namespace WebApplication1.Controllers
             this._context.SaveChanges();
             return Ok(stock.toStockDto());
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult delete([FromRoute] int id) {
+            var stock = this._context.Stock.Find(id);
+            if(stock == null) {
+                return NotFound();
+            }
+            this._context.Stock.Remove(stock);
+            this._context.SaveChanges();
+            return NoContent();
+        }
     }
 }
