@@ -18,7 +18,7 @@ namespace WebApplication1.Migrations
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
+            #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
@@ -98,7 +98,7 @@ namespace WebApplication1.Migrations
                 {
                     b.Navigation("Comments");
                 });
-#pragma warning restore 612, 618
+            #pragma warning restore 612, 618
         }
     }
 }

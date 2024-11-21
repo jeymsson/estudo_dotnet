@@ -4,3 +4,9 @@ GET {{WebApplication1_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+GET {{WebApplication1_HostAddress}}/api/stock/
+Accept: application/json
+###
+GET {{WebApplication1_HostAddress}}/api/stock/4
+Accept: application/json
