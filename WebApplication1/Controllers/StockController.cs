@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
+using WebApplication1.Dto.Stock;
 using WebApplication1.Mappers;
 
 namespace WebApplication1.Controllers
@@ -32,6 +33,14 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
             return Ok(stock.toStockDto());
+        }
+
+        [HttpPost]
+        public IActionResult create([FromBody] CreateStockRequestDto stockDto) {
+            var stockModel = stockDto.toCreateStockRequestDto();
+            this._context.Stock.Add(stockModel);
+            this._context.SaveChanges();
+            return CreatedAtAction(nameof(getById), new { id = stockModel.Id }, stockModel.toStockDto());
         }
     }
 }
