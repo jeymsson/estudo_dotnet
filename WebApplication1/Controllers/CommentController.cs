@@ -12,6 +12,7 @@ using WebApplication1.Mappers;
 namespace WebApplication1.Controllers
 {
     [Route("api/comment")]
+    [ApiController]
     public class CommentController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -41,8 +42,11 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<IActionResult> create([FromBody] CreateCommentRequestDto request) {
             var data = request.toCreateCommentRequestDto();
-            await this._repository.AddAsync(data);
-            return Ok(data.toCommentDto());
+            var model = await this._repository.AddAsync(data);
+            if(model == null) {
+                return BadRequest();
+            }
+            return Ok(model.toCommentDto());
         }
 
         [HttpPut("{id}")]

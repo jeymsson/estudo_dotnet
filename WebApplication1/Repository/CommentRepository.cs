@@ -21,8 +21,12 @@ namespace WebApplication1.Repository
             return await _context.Comment.ToListAsync();
         }
 
-        public async Task<Comment> AddAsync(Comment commentModel)
+        public async Task<Comment?> AddAsync(Comment commentModel)
         {
+            var stock = await this._context.Stock.FindAsync(commentModel.StockId);
+            if(stock == null) {
+                return null;
+            }
             await this._context.AddAsync(commentModel);
             await this._context.SaveChangesAsync();
             return commentModel;

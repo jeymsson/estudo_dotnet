@@ -10,7 +10,7 @@ namespace WebApplication1.interfaces
     {
         Task<List<Comment>> getAllAsync();
         Task<Comment?> FindAsync(int id);
-        Task<Comment> AddAsync(Comment commentModel);
+        Task<Comment?> AddAsync(Comment commentModel);
         Task<Comment?> UpdateAsync(int id, Comment commentModel);
         Task<Comment> DeleteAsync(Comment commentModel);
 
