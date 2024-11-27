@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApplication1.Dto.Comment;
+using WebApplication1.Models;
 
 namespace WebApplication1.Dto.Stock
 {
@@ -14,6 +16,6 @@ namespace WebApplication1.Dto.Stock
         public decimal LastDiv { get; set; }
         public string Industry { get; set; } = string.Empty;
         public long MarketCap { get; set; }
-        // public List<Comment> Comments { get; set; } = new List<Comment>();
+        public List<CommentDto> Comments { get; set; } = new List<CommentDto>();
     }
 }

@@ -18,7 +18,7 @@ namespace WebApplication1.Repository
 
         public async Task<List<Stock>> getAllAsync()
         {
-            return await _context.Stock.ToListAsync();
+            return await _context.Stock.Include(c => c.Comments).ToListAsync();
         }
 
         public async Task<Stock> AddAsync(Stock stockModel)
@@ -46,7 +46,7 @@ namespace WebApplication1.Repository
 
         public async Task<Stock?> FindAsync(int id)
         {
-            return await this._context.Stock.FindAsync(id);
+            return await this._context.Stock.Include(c => c.Comments).FirstOrDefaultAsync(i => i.Id == id);
         }
 
         public async Task<Stock> DeleteAsync(Stock stockModel)
