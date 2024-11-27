@@ -11,6 +11,7 @@ using WebApplication1.Mappers;
 
 namespace WebApplication1.Controllers
 {
+    [Route("api/comment")]
     public class CommentController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
