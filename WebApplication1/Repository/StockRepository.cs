@@ -55,5 +55,9 @@ namespace WebApplication1.Repository
             await this._context.SaveChangesAsync();
             return stock.Entity;
         }
+
+        public Task<bool> stockExists(int stockId) {
+            return this._context.Stock.AnyAsync(s => s.Id == stockId);
+        }
     }
 }

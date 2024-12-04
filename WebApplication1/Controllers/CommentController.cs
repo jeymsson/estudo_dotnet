@@ -27,13 +27,19 @@ namespace WebApplication1.Controllers
 
         [HttpGet]
         public async Task<IActionResult> getAll() {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var data = await this._repository.getAllAsync();
             var dataDto = data.Select(comment => comment.toCommentDto());
             return Ok(dataDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> getById([FromRoute] int id) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var data = await this._repository.FindAsync(id);
             if(data == null) {
                 return NotFound();
@@ -43,6 +49,9 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         public async Task<IActionResult> create([FromRoute] int stock_id, [FromBody] CreateCommentRequestDto commentDto) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             if(!await this._stockRepository.stockExists(stock_id)) {
                 return BadRequest("Stock not exists");
             }
@@ -51,8 +60,11 @@ namespace WebApplication1.Controllers
             return Ok(model);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> update([FromRoute] int stock_id, [FromBody] UpdateCommentRequestDto request) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             if(!await this._stockRepository.stockExists(stock_id)) {
                 return BadRequest("Stock not exists");
             }
@@ -62,8 +74,11 @@ namespace WebApplication1.Controllers
         }
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> delete([FromRoute] int id) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var data = await this._repository.FindAsync(id);
             if(data == null) {
                 return NotFound();
@@ -71,6 +86,5 @@ namespace WebApplication1.Controllers
             await this._repository.DeleteAsync(data);
             return Ok(data.toCommentDto());
         }
-
     }
 }

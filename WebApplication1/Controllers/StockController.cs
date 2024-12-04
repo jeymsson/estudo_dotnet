@@ -24,14 +24,20 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        public async  Task<IActionResult> GetAll() {
+        public async Task<IActionResult> GetAll() {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var data = await this._stockRepository.getAllAsync();
             var dataDto = data.Select(stock => stock.toStockDto());
             return Ok(dataDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> getById([FromRoute] int id) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var stock = await this._stockRepository.FindAsync(id);
             if(stock == null) {
                 return NotFound();
@@ -41,13 +47,19 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         public async Task<IActionResult> create([FromBody] CreateStockRequestDto stockDto) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var stockModel = stockDto.toCreateStockRequestDto();
             await this._stockRepository.AddAsync(stockModel);
             return CreatedAtAction(nameof(getById), new { id = stockModel.Id }, stockModel.toStockDto());
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> update([FromRoute] int id, [FromBody] UpdateStockRequestDto stockDto) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var stockModel = stockDto.toUpdateStockRequestDto();
             var stock = await this._stockRepository.UpdateAsync(id, stockModel);
             if(stock == null) {
@@ -57,8 +69,11 @@ namespace WebApplication1.Controllers
         }
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> delete([FromRoute] int id) {
+            if(!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             var stock = await this._stockRepository.FindAsync(id);
             if(stock == null) {
                 return NotFound();
