@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
+using WebApplication1.Helpers;
 using WebApplication1.interfaces;
 using WebApplication1.Models;
 
@@ -16,9 +17,16 @@ namespace WebApplication1.Repository
             this._context = context;
         }
 
-        public async Task<List<Stock>> getAllAsync()
+        public async Task<List<Stock>> getAllAsync(QueryObject query)
         {
-            return await _context.Stock.Include(c => c.Comments).ToListAsync();
+            var stocks = _context.Stock.Include(c => c.Comments).AsQueryable();
+            if(!string.IsNullOrEmpty(query.Symbol)) {
+                stocks = stocks.Where(s => s.Symbol.Contains(query.Symbol));
+            }
+            if(!string.IsNullOrEmpty(query.CompanyName)) {
+                stocks = stocks.Where(s => s.CompanyName.Contains(query.CompanyName));
+            }
+            return await stocks.ToListAsync();
         }
 
         public async Task<Stock> AddAsync(Stock stockModel)
