@@ -23,10 +23,6 @@ namespace WebApplication1.Repository
 
         public async Task<Comment?> AddAsync(Comment commentModel)
         {
-            var stock = await this._context.Stock.FindAsync(commentModel.StockId);
-            if(stock == null) {
-                return null;
-            }
             await this._context.AddAsync(commentModel);
             await this._context.SaveChangesAsync();
             return commentModel;
@@ -55,6 +51,10 @@ namespace WebApplication1.Repository
             var comment = this._context.Remove(commentModel);
             await this._context.SaveChangesAsync();
             return comment.Entity;
+        }
+
+        public Task<bool> stockExists(int stockId){
+            return this._context.Stock.AnyAsync(s => s.Id == stockId);
         }
     }
 }

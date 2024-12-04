@@ -17,10 +17,12 @@ namespace WebApplication1.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ICommentRepository _repository;
-        public CommentController(ApplicationDbContext context, ICommentRepository repository)
+        private readonly IStockRepository _stockRepository;
+        public CommentController(ApplicationDbContext context, ICommentRepository repository, IStockRepository stockRepository)
         {
             this._context = context;
             this._repository = repository;
+            this._stockRepository = stockRepository;
         }
 
         [HttpGet]
@@ -40,23 +42,22 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> create([FromBody] CreateCommentRequestDto request) {
-            var data = request.toCreateCommentRequestDto();
-            var model = await this._repository.AddAsync(data);
-            if(model == null) {
-                return BadRequest();
+        public async Task<IActionResult> create([FromRoute] int stock_id, [FromBody] CreateCommentRequestDto commentDto) {
+            if(!await this._stockRepository.stockExists(stock_id)) {
+                return BadRequest("Stock not exists");
             }
-            return Ok(model.toCommentDto());
+            var data = commentDto.toCommentFromCreate(stock_id);
+            var model = await this._repository.AddAsync(data);
+            return Ok(model);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> update([FromBody] UpdateCommentRequestDto request, [FromRoute] int id) {
-            var data = await this._repository.FindAsync(id);
-            if(data == null) {
-                return NotFound();
+        public async Task<IActionResult> update([FromRoute] int stock_id, [FromBody] UpdateCommentRequestDto request) {
+            if(!await this._stockRepository.stockExists(stock_id)) {
+                return BadRequest("Stock not exists");
             }
-            var dataDto = request.toUpdateCommentRequestDto();
-            await this._repository.UpdateAsync(id, dataDto);
+            var dataDto = request.toCommentFromUpdate(stock_id);
+            await this._repository.UpdateAsync(stock_id, dataDto);
             return Ok(dataDto.toCommentDto());
         }
 

@@ -18,19 +18,19 @@ namespace WebApplication1.Mappers
             };
         }
 
-        public static Comment toCreateCommentRequestDto(this CreateCommentRequestDto commentModel) {
+        public static Comment toCommentFromCreate(this CreateCommentRequestDto commentModel, int stock_id) {
             return new Comment {
                 Title = commentModel.Title,
                 Content = commentModel.Content,
-                StockId = commentModel.StockId
+                StockId = stock_id,
             };
         }
 
-        public static Comment toUpdateCommentRequestDto(this UpdateCommentRequestDto commentModel) {
+        public static Comment toCommentFromUpdate(this UpdateCommentRequestDto commentModel, int stock_id) {
             return new Comment {
                 Title = commentModel.Title,
                 Content = commentModel.Content,
-                StockId = commentModel.StockId
+                StockId = stock_id
             };
         }
     }

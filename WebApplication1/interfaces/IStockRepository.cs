@@ -13,6 +13,6 @@ namespace WebApplication1.interfaces
         Task<Stock> AddAsync(Stock stockModel);
         Task<Stock?> UpdateAsync(int id, Stock stockModel);
         Task<Stock> DeleteAsync(Stock stockModel);
-
+        Task<bool> stockExists(int stockId);
     }
 }
