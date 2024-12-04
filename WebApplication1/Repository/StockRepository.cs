@@ -34,7 +34,10 @@ namespace WebApplication1.Repository
                     stocks = query.IsDescending ? stocks.OrderByDescending(s => s.CompanyName) : stocks.OrderBy(s => s.CompanyName);
                 }
             }
-            return await stocks.ToListAsync();
+
+            var skip = (query.PageNumber - 1) * query.PageSize;
+
+            return await stocks.Skip(skip).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<Stock> AddAsync(Stock stockModel)
