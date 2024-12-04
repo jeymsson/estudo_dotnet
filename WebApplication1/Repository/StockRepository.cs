@@ -26,6 +26,14 @@ namespace WebApplication1.Repository
             if(!string.IsNullOrEmpty(query.CompanyName)) {
                 stocks = stocks.Where(s => s.CompanyName.Contains(query.CompanyName));
             }
+            if(!string.IsNullOrEmpty(query.SortBy)) {
+                if(query.SortBy == "symbol") {
+                    stocks = query.IsDescending ? stocks.OrderByDescending(s => s.Symbol) : stocks.OrderBy(s => s.Symbol);
+                }
+                if(query.SortBy == "companyName") {
+                    stocks = query.IsDescending ? stocks.OrderByDescending(s => s.CompanyName) : stocks.OrderBy(s => s.CompanyName);
+                }
+            }
             return await stocks.ToListAsync();
         }
 
