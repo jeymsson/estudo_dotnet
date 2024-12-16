@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Dto.Account;
+using WebApplication1.interfaces;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -15,9 +16,11 @@ namespace WebApplication1.Controllers
     {
 
         private readonly UserManager<AppUser> _userManager;
-        public AccountController(UserManager<AppUser> userManager)
+        private readonly ITokenService _tokenService;
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService)
         {
             this._userManager = userManager;
+            this._tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -36,7 +39,11 @@ namespace WebApplication1.Controllers
                 if(createUser.Succeeded) {
                     var roleResult = await this._userManager.AddToRoleAsync(appUser, "User");
                     if(roleResult.Succeeded) {
-                        return Ok("User created.");
+                        return Ok( new NewUserDto {
+                            Username = appUser.UserName,
+                            Email = appUser.Email,
+                            Token = this._tokenService.CreateToken(appUser)
+                        } );
                     } else {
                         return StatusCode(500, roleResult.Errors);
                     }
