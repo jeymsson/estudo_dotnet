@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
@@ -13,6 +14,7 @@ namespace WebApplication1.Controllers
 {
     [Route("api/comment")]
     [ApiController]
+    [Authorize]
     public class CommentController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
