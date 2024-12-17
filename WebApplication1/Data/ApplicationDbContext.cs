@@ -19,7 +19,7 @@ namespace WebApplication1.Data
         public DbSet<Stock> Stock {get; set;}
         public DbSet<Comment> Comment {get; set;}
         public DbSet<AppUser> AppUser {get; set;}
-        public DbSet<Portfolio> Portfolio {get; set;}
+        public DbSet<Portfolio> Portfolios {get; set;}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
