@@ -25,6 +25,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
     options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
 }).AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme =
