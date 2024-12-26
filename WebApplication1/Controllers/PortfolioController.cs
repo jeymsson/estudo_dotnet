@@ -60,5 +60,25 @@ namespace WebApplication1.Controllers
 
             return Ok(portfolio);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> deleteStock([FromQuery] int id) {
+            var user = User.getUsername();
+            var appUser = await this._userManager.FindByNameAsync(user);
+
+            var portfolio = await this._portfolioRepo.findPortfolioByIdAsync(appUser.Id, id);
+
+            if (portfolio == null) {
+                return BadRequest("Portfolio not found");
+            }
+
+            if (portfolio.AppUserId != appUser.Id) {
+                return Unauthorized("Unauthorized, you are not the owner of this portfolio");
+            }
+
+            await this._portfolioRepo.deletePortfolioAsync(portfolio);
+
+            return Ok(portfolio);
+        }
     }
 }

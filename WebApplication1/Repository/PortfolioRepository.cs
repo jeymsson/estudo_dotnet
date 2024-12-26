@@ -46,5 +46,17 @@ namespace WebApplication1.Repository
             }
             return this._context.Portfolios.FirstOrDefaultAsync(p => p.StockId == stock.Id);
         }
+
+        public Task<Portfolio> findPortfolioByIdAsync(string userId, int id)
+        {
+            return this._context.Portfolios.FirstOrDefaultAsync(p => p.AppUserId == userId.ToString() && p.StockId == id);
+        }
+
+        public Task<Portfolio> deletePortfolioAsync(Portfolio portfolio)
+        {
+            this._context.Portfolios.Remove(portfolio);
+            this._context.SaveChanges();
+            return Task.FromResult(portfolio);
+        }
     }
 }
