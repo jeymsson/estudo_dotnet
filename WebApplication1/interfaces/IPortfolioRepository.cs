@@ -8,6 +8,8 @@ namespace WebApplication1.interfaces
 {
     public interface IPortfolioRepository
     {
-        Task<List<Stock>> getUserPortfolio(AppUser user);
+        public Task<List<Stock>> getUserPortfolio(AppUser user);
+        public Task<Portfolio> createAsync(Portfolio portfolio);
+        public Task<Portfolio> findPortfolioByStockAsync(Stock stock);
     }
 }

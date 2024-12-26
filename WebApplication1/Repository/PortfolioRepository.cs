@@ -31,5 +31,20 @@ namespace WebApplication1.Repository
                 })
                 .ToListAsync();
         }
+
+        public async Task<Portfolio> createAsync(Portfolio portfolio)
+        {
+            await this._context.Portfolios.AddAsync(portfolio);
+            await this._context.SaveChangesAsync();
+            return portfolio;
+        }
+
+        public Task<Portfolio> findPortfolioByStockAsync(Stock stock)
+        {
+            if (stock == null) {
+                throw new ArgumentNullException(nameof(stock));
+            }
+            return this._context.Portfolios.FirstOrDefaultAsync(p => p.StockId == stock.Id);
+        }
     }
 }

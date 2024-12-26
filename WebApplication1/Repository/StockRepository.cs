@@ -78,5 +78,10 @@ namespace WebApplication1.Repository
         public Task<bool> stockExists(int stockId) {
             return this._context.Stock.AnyAsync(s => s.Id == stockId);
         }
+
+        public async Task<Stock> findStockByName(string symbol)
+        {
+            return await this._context.Stock.FirstOrDefaultAsync(s => s.Symbol == symbol);
+        }
     }
 }

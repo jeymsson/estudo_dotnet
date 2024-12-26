@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
+using WebApplication1.Dto.Portfolio;
 using WebApplication1.Extensions;
 using WebApplication1.interfaces;
 using WebApplication1.Models;
@@ -19,9 +20,11 @@ namespace WebApplication1.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IPortfolioRepository _portfolioRepo;
-        public PortfolioController(UserManager<AppUser> userManager, IPortfolioRepository portfolioRepo) {
+        private readonly IStockRepository stockRepo;
+        public PortfolioController(UserManager<AppUser> userManager, IPortfolioRepository portfolioRepo, IStockRepository stockRepo) {
             this._userManager = userManager;
             this._portfolioRepo = portfolioRepo;
+            this.stockRepo = stockRepo;
         }
 
         [HttpGet]
@@ -30,6 +33,32 @@ namespace WebApplication1.Controllers
             var appUser = await this._userManager.FindByNameAsync(user);
             var userPortfolio = await this._portfolioRepo.getUserPortfolio(appUser);
             return Ok(userPortfolio);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> addStock([FromBody] CreatePortfolioRequestDto createPortfolioRequestDto) {
+            var user = User.getUsername();
+            var appUser = await this._userManager.FindByNameAsync(user);
+            var stock = await this.stockRepo.findStockByName(createPortfolioRequestDto.Symbol);
+
+            if (stock == null) {
+                return BadRequest("Stock not found");
+            }
+
+            var havePortfolio = await this._portfolioRepo.findPortfolioByStockAsync(stock);
+
+            if (havePortfolio != null) {
+                return BadRequest("Stock already in portfolio");
+            }
+
+            var portfolio = new Portfolio {
+                AppUserId = appUser.Id,
+                StockId = stock.Id,
+            };
+
+            await this._portfolioRepo.createAsync(portfolio);
+
+            return Ok(portfolio);
         }
     }
 }
