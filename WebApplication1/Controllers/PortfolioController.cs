@@ -28,8 +28,8 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> getUserPortfolio() {
             var user = User.getUsername();
             var appUser = await this._userManager.FindByNameAsync(user);
-            var userPortifolio = this._portfolioRepo.getUserPortfolio(appUser);
-            return Ok(userPortifolio);
+            var userPortfolio = await this._portfolioRepo.getUserPortfolio(appUser);
+            return Ok(userPortfolio);
         }
     }
 }

@@ -18,7 +18,8 @@ namespace WebApplication1.Repository
 
         public async Task<List<Stock>> getUserPortfolio(AppUser user)
         {
-            return await this._context.Portfolios.Where(p => p.AppUserId == user.Id)
+            return await this._context.Portfolios
+                .Where(p => p.AppUserId == user.Id)
                 .Select(stock => new Stock {
                     Id = stock.StockId,
                     Symbol = stock.Stock.Symbol,
