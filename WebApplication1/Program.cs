@@ -77,7 +77,7 @@ builder.Services.AddAuthentication(options => {
         ValidateLifetime = true,
     };
 });
-
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 
