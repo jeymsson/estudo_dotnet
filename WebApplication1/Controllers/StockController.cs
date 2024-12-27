@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Custom.Attributes;
 using WebApplication1.Data;
 using WebApplication1.Dto.Stock;
 using WebApplication1.Helpers;
@@ -15,7 +16,7 @@ namespace WebApplication1.Controllers
 {
     [Route("api/stock")]
     [ApiController]
-    [Authorize]
+    [CustomAuthorize]
     public class StockController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
