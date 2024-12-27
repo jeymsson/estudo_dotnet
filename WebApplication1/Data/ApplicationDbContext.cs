@@ -40,13 +40,5 @@ namespace WebApplication1.Data
             BuildSeeds buildSeeds = new BuildSeeds(builder);
         }
 
-        // protected override void OnModelCreating(ModelBuilder modelBuilder)
-        // {
-        //     modelBuilder.Entity<WebApplication1.Models.Stock>()
-        //         .HasMany(s => s.Comments)
-        //         .WithOne(c => c.Stock)
-        //         .HasForeignKey(c => c.StockId);
-        // }
-
     }
 }
