@@ -50,9 +50,6 @@ namespace WebApplication1.Repository
         public async Task<Stock?> UpdateAsync(int id, Stock stockModel)
         {
             var stock = await this.FindAsync(id);
-            if(stock == null) {
-                return null;
-            }
             stock.Symbol = stockModel.Symbol;
             stock.CompanyName = stockModel.CompanyName;
             stock.Purchase = stockModel.Purchase;

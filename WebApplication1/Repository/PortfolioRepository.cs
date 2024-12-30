@@ -41,9 +41,6 @@ namespace WebApplication1.Repository
 
         public Task<Portfolio> findPortfolioByStockAsync(Stock stock)
         {
-            if (stock == null) {
-                throw new ArgumentNullException(nameof(stock));
-            }
             return this._context.Portfolios.FirstOrDefaultAsync(p => p.StockId == stock.Id);
         }
 

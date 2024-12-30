@@ -31,9 +31,6 @@ namespace WebApplication1.Repository
         public async Task<Comment?> UpdateAsync(int id, Comment commentModel)
         {
             var comment = await this.FindAsync(id);
-            if(comment == null) {
-                return null;
-            }
             comment.Title = commentModel.Title;
             comment.Content = commentModel.Content;
             comment.StockId = commentModel.StockId;
