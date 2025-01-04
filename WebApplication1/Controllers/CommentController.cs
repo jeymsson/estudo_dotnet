@@ -10,6 +10,7 @@ using WebApplication1.Data;
 using WebApplication1.Dto.Comment;
 using WebApplication1.interfaces;
 using WebApplication1.Mappers;
+using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
@@ -34,7 +35,7 @@ namespace WebApplication1.Controllers
                 return BadRequest(ModelState);
             }
             var data = await this._repository.getAllAsync();
-            var dataDto = data.Select(comment => comment.toCommentDto());
+            var dataDto = data.ToList<Comment>();
             return Ok(dataDto);
         }
 
