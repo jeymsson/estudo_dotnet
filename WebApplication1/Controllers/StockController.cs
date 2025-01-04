@@ -11,6 +11,7 @@ using WebApplication1.Dto.Stock;
 using WebApplication1.Helpers;
 using WebApplication1.interfaces;
 using WebApplication1.Mappers;
+using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
@@ -33,7 +34,7 @@ namespace WebApplication1.Controllers
                 return BadRequest(ModelState);
             }
             var data = await this._stockRepository.getAllAsync(query);
-            var dataDto = data.Select(stock => stock.toStockDto());
+            var dataDto = data.Select(stock => stock).ToList<Stock>();
             return Ok(dataDto);
         }
 
