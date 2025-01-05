@@ -30,6 +30,8 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> login([FromBody] LoginDto login) {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
+            if (login.Username == null || login.Password == null)
+                return Unauthorized("Username and password are required");
 
             var user = await this._userManager.Users.FirstOrDefaultAsync(x => x.UserName == login.Username);
 
