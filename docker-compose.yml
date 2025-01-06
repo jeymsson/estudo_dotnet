@@ -1,9 +1,44 @@
+version: '3.8'
+
 services:
   sqlserver-dk:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver-dk
     environment:
       SA_PASSWORD: "SqlServer2019"
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
+    restart: on-failure:5
     ports:
       - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "sqlcmd -S localhost -U sa -P SqlServer2019 -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  webapplication1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: webapplication1
+    container_name: webapplication1
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
+    ports:
+      - "5001:8080"
+    depends_on:
+      sqlserver-dk:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  sqlserverdata:
