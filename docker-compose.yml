@@ -19,26 +19,32 @@ services:
       timeout: 10s
       retries: 3
 
-  webapplication1:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: webapplication1
-    container_name: webapplication1
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
+#   webapplication1:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     image: webapplication1
+#     container_name: webapplication1
+#     restart: unless-stopped
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Development
+#       - ConnectionStrings__DefaultConnection=Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
+#     ports:
+#       - "5001:8080"
+#     depends_on:
+#       sqlserver-dk:
+#         condition: service_started
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 3
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
     ports:
-      - "5001:8080"
-    depends_on:
-      sqlserver-dk:
-        condition: service_started
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
+      - "4317:4317"
+      - "16686:16686"
 
 volumes:
   sqlserverdata:

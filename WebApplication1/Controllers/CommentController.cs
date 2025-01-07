@@ -16,7 +16,7 @@ namespace WebApplication1.Controllers
 {
     [Route("api/comment")]
     [ApiController]
-    [CustomAuthorize]
+    // [CustomAuthorize]
     public class CommentController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

@@ -5,10 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebApplication1.Data;
-using WebApplication1.interfaces;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 using WebApplication1.Service;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Logs;
+using WebApplication1.Tracing;
+using WebApplication1.interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +89,37 @@ builder.Services.AddControllers()
     .AddNewtonsoftJson(options => {
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
+
+builder.Services.AddOpenTelemetry().WithTracing(traceProvider =>
+{
+    traceProvider
+        // .AddSource(OpenTelemetryExtensions.ServiceName)
+        .SetResourceBuilder(
+            ResourceBuilder.CreateDefault()
+                .AddService(
+                    serviceName: OpenTelemetryExtensions.ServiceName,
+                    serviceVersion: OpenTelemetryExtensions.ServiceVersion
+                )
+        )
+        .AddOtlpExporter()
+        .AddHttpClientInstrumentation()
+        .AddAspNetCoreInstrumentation()
+        // .AddJaegerExporter(exporter =>
+        // {
+        //     exporter.AgentHost = builder.Configuration["Jaeger:AgentHost"];
+        //     exporter.AgentPort = Convert.ToInt32(builder.Configuration["Jaeger:AgentPort"]);
+        // })
+        .AddConsoleExporter();
+});
+
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.AddOtlpExporter(otlpOptions =>
+    {
+        otlpOptions.Endpoint = new Uri("http://otel-collector:4317");
+    });
+});
 
 var app = builder.Build();
 
