@@ -19,32 +19,70 @@ services:
       timeout: 10s
       retries: 3
 
-#   webapplication1:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     image: webapplication1
-#     container_name: webapplication1
-#     restart: unless-stopped
-#     environment:
-#       - ASPNETCORE_ENVIRONMENT=Development
-#       - ConnectionStrings__DefaultConnection=Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
-#     ports:
-#       - "5001:8080"
-#     depends_on:
-#       sqlserver-dk:
-#         condition: service_started
-#     healthcheck:
-#       test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
-#       interval: 10s
-#       timeout: 10s
-#       retries: 3
+  dk-webapplication1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: im-webapplication1
+    container_name: ct-webapplication1
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
+      EnableOTLPExporter: true
+      Hosts__Jaeger: jaeger-agent
+      Hosts__OTLP: otel-collector
+    ports:
+      - "5001:8080"
+    depends_on:
+      sqlserver-dk:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.69.0
+    container_name: otel-collector
+    user: 0:0
+    depends_on:
+    #   - jaeger
+      - prometheus
+      - dk-webapplication1
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    environment:
+      - OTELCOL_LOG_LEVEL=debug
+    ports:
+      - 13133:13133 # health_check extension
+
+  prometheus:
+    image: prom/prometheus:v2.40.1
+    container_name: prometheus
+    command:
+      - '--web.enable-remote-write-receiver' # enable remote write integration
+      - '--config.file=/etc/prometheus/prometheus.yml' # default configuration
+    ports:
+      - 9090:9090
 
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.39
+    container_name: jaeger
+    hostname: jaeger
     ports:
-      - "4317:4317"
-      - "16686:16686"
+      - 16686:16686
+
+  jaeger-agent:
+    container_name: jaeger-agent
+    hostname: jaeger-agent
+    image: jaegertracing/jaeger-agent:1.41
+    command: ['--reporter.grpc.host-port=otel-collector:14250']
+
+
 
 volumes:
   sqlserverdata:
