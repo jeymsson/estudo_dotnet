@@ -16,6 +16,7 @@ receivers:
          - job_name: dk-webapplication1
            static_configs:
            - targets: [dk-webapplication1:8080]
+
 processors:
   batch:
     timeout: 10s
@@ -51,6 +52,7 @@ processors:
           status_code: {status_codes: [ERROR]}
         }
       ]
+
 exporters:
   prometheusremotewrite:
     endpoint: http://prometheus:9090/api/v1/write
@@ -68,6 +70,7 @@ exporters:
     sampling_thereafter: 1
 extensions:
   health_check:
+
 service:
   extensions: [health_check] # Check health of collector at http://localhost:13133/
   pipelines:

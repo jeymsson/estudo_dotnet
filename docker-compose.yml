@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  sqlserver-dk:
+  dk-sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqlserver-dk
+    container_name: ct-sqlserver
     environment:
       SA_PASSWORD: "SqlServer2019"
       ACCEPT_EULA: "Y"
@@ -28,14 +28,14 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
+      ConnectionStrings__DefaultConnection: Server=dk-sqlserver,1433;Database=master;User=sa;Password=SqlServer2019;TrustServerCertificate=True;
       EnableOTLPExporter: true
       Hosts__Jaeger: jaeger-agent
       Hosts__OTLP: otel-collector
     ports:
       - "5001:8080"
     depends_on:
-      sqlserver-dk:
+      dk-sqlserver:
         condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
@@ -43,17 +43,16 @@ services:
       timeout: 10s
       retries: 3
 
-
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.69.0
     container_name: otel-collector
     user: 0:0
     depends_on:
-    #   - jaeger
+      - jaeger
       - prometheus
       - dk-webapplication1
     volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+      - ./config/open-telemetry/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     command: ["--config=/etc/otel-collector-config.yaml"]
     environment:
       - OTELCOL_LOG_LEVEL=debug
@@ -61,8 +60,10 @@ services:
       - 13133:13133 # health_check extension
 
   prometheus:
-    image: prom/prometheus:v2.40.1
+    image: prom/prometheus:v3.1.0
     container_name: prometheus
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--web.enable-remote-write-receiver' # enable remote write integration
       - '--config.file=/etc/prometheus/prometheus.yml' # default configuration
@@ -70,7 +71,7 @@ services:
       - 9090:9090
 
   jaeger:
-    image: jaegertracing/all-in-one:1.39
+    image: jaegertracing/all-in-one:1.65.0
     container_name: jaeger
     hostname: jaeger
     ports:
@@ -79,7 +80,7 @@ services:
   jaeger-agent:
     container_name: jaeger-agent
     hostname: jaeger-agent
-    image: jaegertracing/jaeger-agent:1.41
+    image: jaegertracing/jaeger-agent:1.62.0
     command: ['--reporter.grpc.host-port=otel-collector:14250']
 
 
