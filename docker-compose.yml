@@ -44,7 +44,7 @@ services:
       retries: 3
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.69.0
+    image: otel/opentelemetry-collector-contrib:0.117.0
     container_name: otel-collector
     user: 0:0
     depends_on:
@@ -82,8 +82,6 @@ services:
     hostname: jaeger-agent
     image: jaegertracing/jaeger-agent:1.62.0
     command: ['--reporter.grpc.host-port=otel-collector:14250']
-
-
 
 volumes:
   sqlserverdata:

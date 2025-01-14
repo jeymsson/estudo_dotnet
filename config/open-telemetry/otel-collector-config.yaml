@@ -13,45 +13,37 @@ receivers:
         scrape_interval: 5s
         evaluation_interval: 15s
       scrape_configs:
-         - job_name: dk-webapplication1
-           static_configs:
-           - targets: [dk-webapplication1:8080]
+        - job_name: dk-webapplication1
+          static_configs:
+            - targets: [dk-webapplication1:8080]
 
 processors:
   batch:
     timeout: 10s
-  attributes/host-location: # adds an attribute to specify the location name
+  attributes:
     actions:
-       - key: host.location
-         action: insert
-         value: homo
-  transform/span-name: # creates an attribute with the span's original name
-    trace_statements:
-       - context: span
-         statements:
-         - set(attributes["span.name.original"], name)
-  span/rename: # uses the attributes to create a new name of the span
+      - key: host.location
+        action: insert
+        value: homo
+  span:
     name:
       from_attributes: [span.name.original, host.location]
       separator: ':'
-  filter/vote_count:
+  filter:
     metrics:
       include:
         match_type: strict
         metric_names:
           - vote_count
   tail_sampling:
-    decision_wait: 10s # wait since the first span for making a decision
-    num_traces: 100 # number of traces stored in memory
-    expected_new_traces_per_sec: 10 # expected number of new traces
+    decision_wait: 10s
+    num_traces: 100
+    expected_new_traces_per_sec: 10
     policies:
-      [
-        {
-          name: policy-1,
-          type: status_code,
-          status_code: {status_codes: [ERROR]}
-        }
-      ]
+      - name: policy-1
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
 
 exporters:
   prometheusremotewrite:
@@ -60,31 +52,35 @@ exporters:
       insecure: true
     external_labels:
       via: collector
-  jaeger:
-    endpoint: jaeger:14250
+  otlp:
+    endpoint: jaeger:4317
     tls:
       insecure: true
-  logging:
+  debug:
     verbosity: detailed
     sampling_initial: 1
     sampling_thereafter: 1
+  otlphttp/logs:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+
 extensions:
   health_check:
+  zpages:
 
 service:
-  extensions: [health_check] # Check health of collector at http://localhost:13133/
+  extensions: [health_check, zpages]
   pipelines:
     traces:
       receivers: [otlp, jaeger]
-      # Only one processor can be used in a pipeline. Uncomment this processor to enable tail processor.
-      #processors: [tail_sampling]
-      processors: [batch, attributes/host-location, transform/span-name, span/rename]
-      exporters: [jaeger, logging]
+      processors: [batch, attributes, span]
+      exporters: [otlp, debug]
     metrics:
-      receivers: [prometheus]
-      processors: [batch, filter/vote_count]
-      exporters: [prometheusremotewrite]
+      receivers: [prometheus, otlp]
+      processors: [batch, filter]
+      exporters: [prometheusremotewrite, otlp]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging]
+      exporters: [debug]
