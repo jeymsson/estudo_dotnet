@@ -59,17 +59,6 @@ services:
     ports:
       - 13133:13133 # health_check extension
 
-  prometheus:
-    image: prom/prometheus:v3.1.0
-    container_name: prometheus
-    volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--web.enable-remote-write-receiver' # enable remote write integration
-      - '--config.file=/etc/prometheus/prometheus.yml' # default configuration
-    ports:
-      - 9090:9090
-
   jaeger:
     image: jaegertracing/all-in-one:1.65.0
     container_name: jaeger
@@ -82,6 +71,17 @@ services:
     hostname: jaeger-agent
     image: jaegertracing/jaeger-agent:1.62.0
     command: ['--reporter.grpc.host-port=otel-collector:14250']
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: prometheus
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml' # default configuration
+      - '--web.enable-remote-write-receiver' # enable remote write integration
+    ports:
+      - 9090:9090
 
 volumes:
   sqlserverdata:
