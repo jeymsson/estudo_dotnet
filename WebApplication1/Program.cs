@@ -9,6 +9,7 @@ using WebApplication1.interfaces;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 using WebApplication1.Service;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,8 +92,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(options =>
+    {
+        options.RouteTemplate = "/openapi/{documentName}.json";
+    });
     app.UseSwaggerUI();
+    app.MapScalarApiReference();
 }
 
 app.UseAuthentication();
