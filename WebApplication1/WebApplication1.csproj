@@ -36,6 +36,18 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.11" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
+
+    <!-- Dependências para OpenTelemetry -->
+		<PackageReference Include="OpenTelemetry" Version="1.11.0-rc.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.0-rc.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.6.0-rc.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.0-rc.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.10.0-beta.1" />
+		<PackageReference Include="OpenTelemetry.Extensions.Docker" Version="1.0.0-beta.2" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.0-rc.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />
+		<PackageReference Include="OpenTelemetry.SemanticConventions" Version="1.0.0-rc9.9" />
   </ItemGroup>
 
 </Project>

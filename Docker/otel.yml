@@ -1,0 +1,51 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: otel-collector:4317
+  prometheus:
+    config:
+      global:
+        scrape_interval: 5s
+        evaluation_interval: 15s
+      scrape_configs:
+        - job_name: dk-webapplication1
+          static_configs:
+            - targets: [dk-webapplication1:8080]
+        - job_name: 'otel-collector'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['0.0.0.0:8888']
+
+processors:
+  batch:
+    timeout: 10s
+  attributes:
+    actions:
+      - key: host.location
+        action: insert
+        value: homo
+  span:
+    name:
+      from_attributes: [span.name.original, host.location]
+      separator: ':'
+
+exporters:
+  prometheus:
+    endpoint: otel-collector:8889
+  debug:
+    verbosity: detailed
+    sampling_initial: 1
+    sampling_thereafter: 1
+
+extensions:
+  health_check:
+  zpages:
+
+service:
+  extensions: [health_check, zpages]
+  pipelines:
+    metrics:
+      receivers: [prometheus, otlp]
+      processors: [batch]
+      exporters: [prometheus]
