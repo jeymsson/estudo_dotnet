@@ -83,6 +83,27 @@ services:
     networks:
       otel:
 
+  grafana:
+    # https://github.com/grafana/grafana/releases
+    image: grafana/grafana:11.3.0
+    container_name: grafana
+    #command:
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - grafana-data:/var/lib/grafana
+      - ./Docker/grafana/provisioning:/etc/grafana/provisioning #https://grafana.com/docs/grafana/latest/administration/provisioning/
+    restart: unless-stopped
+    ports:
+      - 3001:3000
+    depends_on:
+      - prometheus
+    networks:
+      otel:
+
   otel-collector:
     container_name: otel-collector
     hostname: otel-collector
@@ -108,4 +129,5 @@ networks:
 
 volumes:
   prometheus:
+  grafana-data:
   sqlserver-data:

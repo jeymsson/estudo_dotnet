@@ -15,7 +15,7 @@ receivers:
         - job_name: 'otel-collector'
           scrape_interval: 10s
           static_configs:
-            - targets: ['0.0.0.0:8888']
+            - targets: ['otel-collector:8888']
 
 processors:
   batch:
@@ -31,12 +31,12 @@ processors:
       separator: ':'
 
 exporters:
-  prometheus:
-    endpoint: otel-collector:8889
   debug:
     verbosity: detailed
     sampling_initial: 1
     sampling_thereafter: 1
+  prometheus:
+    endpoint: otel-collector:8889
 
 extensions:
   health_check:
