@@ -20,21 +20,16 @@ receivers:
 processors:
   batch:
     timeout: 10s
-  attributes:
-    actions:
-      - key: host.location
-        action: insert
-        value: homo
-  span:
-    name:
-      from_attributes: [span.name.original, host.location]
-      separator: ':'
 
 exporters:
   debug:
     verbosity: detailed
     sampling_initial: 1
     sampling_thereafter: 1
+  otlphttp/logs:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
   prometheus:
     endpoint: otel-collector:8889
 
@@ -49,3 +44,8 @@ service:
       receivers: [prometheus, otlp]
       processors: [batch]
       exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlphttp/logs]
+

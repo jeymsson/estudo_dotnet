@@ -122,6 +122,28 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
 bool isConsoleExporterEnabled = bool.Parse(
     builder.Configuration["OTLP:ConsoleExporter"] ?? "false"
 );
+
+// Configure logging
+// Set up logging pipeline
+builder.Logging.AddOpenTelemetry(loggerOptions => {
+    loggerOptions.IncludeFormattedMessage = true;
+    loggerOptions.IncludeScopes = true;
+    loggerOptions.ParseStateValues = true;
+    loggerOptions
+        // define the resource
+        .SetResourceBuilder(resourceBuilder)
+        // add custom processor
+        .AddProcessor(new CustomLogProcessor())
+        // send logs to the console using exporter
+        .AddConsoleExporter();
+        // send logs to collector if configured
+        if (isConsoleExporterEnabled)
+        {
+            loggerOptions.AddOtlpExporter(options =>
+                options.Endpoint = new($"http://{builder.Configuration["Hosts:OTLP"]!}:4317"));
+        };
+});
+
 // Configure tracing and metrics
 builder.Services
     .AddOpenTelemetry()

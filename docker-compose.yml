@@ -36,7 +36,7 @@ services:
       ConnectionStrings__DefaultConnection: Server=dk-sqlserver,1433;Database=master;User=sa;Password=SqlServer2019;TrustServerCertificate=True;
       Hosts__Jaeger: jaeger-agent
       Hosts__OTLP: otel-collector
-      OTLP__ConsoleExporter: false
+      OTLP__ConsoleExporter: true
     ports:
       - "5001:8080"
     depends_on:
@@ -83,6 +83,21 @@ services:
     networks:
       otel:
 
+  loki:
+    # https://github.com/grafana/loki/releases
+    image: grafana/loki:3.2.1
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./Docker/loki.yml:/etc/loki/local-config.yaml
+      - loki:/data/loki
+    restart: unless-stopped
+    ports:
+      - 3100:3100
+    networks:
+      otel:
+
   grafana:
     # https://github.com/grafana/grafana/releases
     image: grafana/grafana:11.3.0
@@ -101,6 +116,7 @@ services:
       - 3001:3000
     depends_on:
       - prometheus
+      - loki
     networks:
       otel:
 
@@ -128,6 +144,7 @@ networks:
   otel:
 
 volumes:
+  loki:
   prometheus:
   grafana-data:
   sqlserver-data:
