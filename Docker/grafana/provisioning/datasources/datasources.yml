@@ -13,6 +13,24 @@ datasources:
   version: 1
   editable: false
 
+- name: Tempo
+  type: tempo
+  uid: tempo
+  access: proxy
+  url: http://tempo:3200
+  basicAuth: false
+  isDefault: false
+  version: 1
+  editable: false
+  # jsonData:
+  #   tracesToLogsV2:
+  #     customQuery: true
+  #     datasourceUid: 'loki'
+  #     query: '{$${__tags}} | trace_id = "$${__trace.traceId}"'
+  #     tags:
+  #       - key: 'service.name'
+  #         value: 'service_name'
+
 - name: Loki
   type: loki
   uid: loki

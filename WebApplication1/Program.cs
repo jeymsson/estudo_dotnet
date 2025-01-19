@@ -147,6 +147,32 @@ builder.Logging.AddOpenTelemetry(loggerOptions => {
 // Configure tracing and metrics
 builder.Services
     .AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder => {
+        tracerProviderBuilder
+            // Sets span status to ERROR on exception
+            .SetErrorStatusOnException()
+            // define the resource
+            .SetResourceBuilder(resourceBuilder)
+            // receive traces from our own custom sources
+            .AddSource(GlobalData.SourceName)
+            // receive traces from built-in sources
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            // ensures that all spans are recorded and sent to exporter
+            .SetSampler(new AlwaysOnSampler())
+            // stream traces to the SpanExporter
+            // BatchActivityExportProcessor processes spans on a separate thread unlike the SimpleActivityExportProcessor
+            .AddProcessor(new BatchActivityExportProcessor(new OtlpTraceExporter(
+                new OtlpExporterOptions {
+                    Endpoint = new Uri($"http://{builder.Configuration["Hosts:OTLP"]}:4317")
+                }
+            )));
+
+        // stream traces to the console
+        if(isConsoleExporterEnabled) {
+            tracerProviderBuilder.AddConsoleExporter();
+        }
+    })
     .WithMetrics(meterProviderBuilder => {
         meterProviderBuilder
             // add rich tags to our metrics
@@ -182,6 +208,20 @@ if (app.Environment.IsDevelopment())
 
 // Enable the /metrics endpoint which will be scraped by Prometheus
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
+// Endpoint to record exception
+app.MapGet("/exception/", (TracerProvider tracerProvider
+    , ILogger<Program> logger) => {
+        var tracer = tracerProvider.GetTracer(GlobalData.SourceName);
+        using var span = tracer.StartActiveSpan("Exception span");
+        var simulatedException = new ApplicationException("Error processing the request");
+        span.RecordException(simulatedException);
+        span.SetStatus(Status.Error);
+        logger.LogError(simulatedException, "Error logged");
+        return Results.Ok();
+    })
+    .WithName("Exception")
+    .Produces(StatusCodes.Status200OK);
 
 app.MapHealthChecks("/health", new HealthCheckOptions {
     AllowCachingResponses = false,

@@ -20,6 +20,30 @@ receivers:
 processors:
   batch:
     timeout: 10s
+  attributes:
+    actions:
+      - key: host.location
+        action: insert
+        value: homo
+  span:
+    name:
+      from_attributes: [span.name.original, host.location]
+      separator: ':'
+  filter:
+    metrics:
+      include:
+        match_type: strict
+        metric_names:
+          - vote_count
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 100
+    expected_new_traces_per_sec: 10
+    policies:
+      - name: policy-1
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
 
 exporters:
   debug:
@@ -32,6 +56,10 @@ exporters:
       insecure: true
   prometheus:
     endpoint: otel-collector:8889
+  otlp/tempo:
+    endpoint: tempo:4007
+    tls:
+      insecure: true
 
 extensions:
   health_check:
@@ -40,9 +68,13 @@ extensions:
 service:
   extensions: [health_check, zpages]
   pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, attributes, span]
+      exporters: [debug, otlp/tempo]
     metrics:
       receivers: [prometheus, otlp]
-      processors: [batch]
+      processors: [batch, filter]
       exporters: [prometheus]
     logs:
       receivers: [otlp]
