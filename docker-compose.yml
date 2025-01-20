@@ -1,9 +1,12 @@
-version: '3.8'
+# Usage:
+# docker compose -f docker-compose-mac.yml --profile all up -d
+# docker compose -f docker-compose-mac.yml --profile otel-all up -d
+# docker compose -f docker-compose-mac.yml --profile otel-no-monitoring --profile services-all up -d
 
 services:
-  sqlserver-dk:
+  dk-sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: sqlserver-dk
+    container_name: ct-sqlserver
     environment:
       SA_PASSWORD: "SqlServer2019"
       ACCEPT_EULA: "Y"
@@ -12,33 +15,165 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - sqlserverdata:/var/opt/mssql
+      - sqlserver-data:/var/opt/mssql
     healthcheck:
       test: ["CMD-SHELL", "sqlcmd -S localhost -U sa -P SqlServer2019 -Q 'SELECT 1'"]
       interval: 10s
       timeout: 10s
       retries: 3
+    networks:
+      otel:
 
-  webapplication1:
+  dk-webapplication1:
     build:
       context: .
       dockerfile: Dockerfile
-    image: webapplication1
-    container_name: webapplication1
+    image: im-webapplication1
+    container_name: ct-webapplication1
     restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver-dk;Database=YourDatabaseName;User Id=sa;Password=SqlServer2019;
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=dk-sqlserver,1433;Database=master;User=sa;Password=SqlServer2019;TrustServerCertificate=True;
+      Hosts__Jaeger: jaeger-agent
+      Hosts__OTLP: otel-collector
+      OTLP__ConsoleExporter: true
     ports:
       - "5001:8080"
     depends_on:
-      sqlserver-dk:
+      dk-sqlserver:
         condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 3
+    networks:
+      otel:
+
+  blackbox:
+    # https://github.com/prometheus/blackbox_exporter/releases
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: blackbox
+    restart: unless-stopped
+    ports:
+      - 9115:9115
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./Docker/blackbox.yml:/etc/blackbox/blackbox.yml
+    command: --config.file=/etc/blackbox/blackbox.yml
+    networks:
+      otel:
+
+  prometheus:
+    # https://github.com/prometheus/prometheus/releases
+    image: prom/prometheus:v3.1.0
+    container_name: prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./Docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+    depends_on:
+      blackbox:
+        condition: "service_started"
+        required: false
+    networks:
+      otel:
+
+  # Tempo runs as user 10001, and docker compose creates the volume as root. As such, we need to chown the volume in order for Tempo to start correctly.
+  init:
+    image: &tempoImage grafana/tempo:2.6.1
+    user: root
+    entrypoint:
+      - "chown"
+      - "10001:10001"
+      - "/var/tempo"
+
+  tempo:
+    # https://github.com/grafana/tempo/releases
+    image: *tempoImage
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./Docker/tempo.yml:/etc/tempo.yaml
+      - tempo:/tmp/tempo
+    restart: unless-stopped
+    ports:
+      - 3200:3200  # tempo
+      - 4007:4317  # otlp grpc
+    depends_on:
+      - otel-collector
+    networks:
+      otel:
+
+  loki:
+    # https://github.com/grafana/loki/releases
+    image: grafana/loki:3.2.1
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./Docker/loki.yml:/etc/loki/local-config.yaml
+      - loki:/data/loki
+    restart: unless-stopped
+    ports:
+      - 3100:3100
+    networks:
+      otel:
+
+  grafana:
+    # https://github.com/grafana/grafana/releases
+    image: grafana/grafana:11.3.0
+    container_name: grafana
+    #command:
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - grafana-data:/var/lib/grafana
+      - ./Docker/grafana/provisioning:/etc/grafana/provisioning #https://grafana.com/docs/grafana/latest/administration/provisioning/
+    restart: unless-stopped
+    ports:
+      - 3001:3000
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    networks:
+      otel:
+
+  otel-collector:
+    container_name: otel-collector
+    hostname: otel-collector
+    image: otel/opentelemetry-collector-contrib:0.113.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./Docker/otel.yml:/etc/otel-collector-config.yaml
+    restart: unless-stopped
+    environment:
+      - OTELCOL_LOG_LEVEL=debug
+    ports:
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "4317:4317"   # OTLP gRPC receiver
+      - "9200:55679"  # zpages
+      - "13133:13133" # health_check extension
+    #   - "14250:14250" # jaeger receiver
+    networks:
+      - otel
+
+networks:
+  otel:
 
 volumes:
-  sqlserverdata:
+  loki:
+  prometheus:
+  tempo:
+  grafana-data:
+  sqlserver-data:
