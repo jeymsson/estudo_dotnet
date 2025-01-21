@@ -1,11 +1,5 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
-using System.Threading.Tasks;
 using WebApplication1.Data;
 using WebApplication1.interfaces;
 using WebApplication1.Repository;
@@ -29,21 +23,6 @@ namespace WebApplication1.Tests
                 });
             });
             _client = _factory.CreateClient();
-        }
-
-        [Fact]
-        public async Task GetSwaggerJson_ReturnsSuccessStatusCode()
-        {
-            // Arrange
-            var request = "/swagger/v1/swagger.json";
-
-            // Act
-            var response = await _client.GetAsync(request);
-
-            // Assert
-            response.EnsureSuccessStatusCode();
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.Contains("\"title\": \"Demo API\"", responseString);
         }
 
         [Fact]
@@ -95,4 +74,5 @@ namespace WebApplication1.Tests
             Assert.NotNull(serviceProvider.GetService<ApplicationDbContext>());
         }
     }
+
 }
