@@ -3,19 +3,6 @@ receivers:
     protocols:
       grpc:
         endpoint: otel-collector:4317
-  prometheus:
-    config:
-      global:
-        scrape_interval: 5s
-        evaluation_interval: 15s
-      scrape_configs:
-        - job_name: dk-webapplication1
-          static_configs:
-            - targets: [dk-webapplication1:8080]
-        - job_name: 'otel-collector'
-          scrape_interval: 10s
-          static_configs:
-            - targets: ['otel-collector:8888']
 
 processors:
   batch:
@@ -29,35 +16,24 @@ processors:
     name:
       from_attributes: [span.name.original, host.location]
       separator: ':'
-  filter:
-    metrics:
-      include:
-        match_type: strict
-        metric_names:
-          - vote_count
-  tail_sampling:
-    decision_wait: 10s
-    num_traces: 100
-    expected_new_traces_per_sec: 10
-    policies:
-      - name: policy-1
-        type: status_code
-        status_code:
-          status_codes: [ERROR]
 
 exporters:
   debug:
     verbosity: detailed
     sampling_initial: 1
     sampling_thereafter: 1
+  prometheus:
+    endpoint: otel-collector:8889
   otlphttp/logs:
     endpoint: http://loki:3100/otlp
     tls:
       insecure: true
-  prometheus:
-    endpoint: otel-collector:8889
   otlp/tempo:
     endpoint: tempo:4007
+    tls:
+      insecure: true
+  otlp/jaeger:
+    endpoint: jaeger:4317
     tls:
       insecure: true
 
@@ -71,10 +47,10 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch, attributes, span]
-      exporters: [debug, otlp/tempo]
+      exporters: [debug, otlp/tempo, otlp/jaeger]
     metrics:
-      receivers: [prometheus, otlp]
-      processors: [batch, filter]
+      receivers: [otlp]
+      processors: [batch]
       exporters: [prometheus]
     logs:
       receivers: [otlp]
