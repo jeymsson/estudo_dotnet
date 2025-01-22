@@ -156,8 +156,21 @@ builder.Services
             // receive traces from our own custom sources
             .AddSource(GlobalData.SourceName)
             // receive traces from built-in sources
-            .AddAspNetCoreInstrumentation()
+            .AddAspNetCoreInstrumentation(options => {
+                options.Filter = (httpContext) => true;
+                options.EnrichWithException = (activity, exception) => {
+                    activity.SetTag("otel.status_code", "ERROR");
+                    activity.SetTag("otel.status_description", exception.Message);
+                    activity.SetTag("exception.type", exception.GetType().Name);
+                    activity.SetTag("exception.message", exception.Message);
+                    activity.SetTag("exception.stacktrace", exception.StackTrace);
+                };
+            })
             .AddHttpClientInstrumentation()
+            // receive traces from Entity Framework Core
+            .AddEntityFrameworkCoreInstrumentation(options => {
+                options.SetDbStatementForText = true;
+            })
             // ensures that all spans are recorded and sent to exporter
             .SetSampler(new AlwaysOnSampler())
             // stream traces to the SpanExporter

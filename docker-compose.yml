@@ -22,7 +22,7 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      otel:
+      - otel
 
   dk-webapplication1:
     build:
@@ -48,7 +48,7 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      otel:
+      - otel
 
   blackbox:
     # https://github.com/prometheus/blackbox_exporter/releases
@@ -62,7 +62,7 @@ services:
       - ./Docker/blackbox.yml:/etc/blackbox/blackbox.yml
     command: --config.file=/etc/blackbox/blackbox.yml
     networks:
-      otel:
+      - otel
 
   prometheus:
     # https://github.com/prometheus/prometheus/releases
@@ -81,7 +81,7 @@ services:
         condition: "service_started"
         required: false
     networks:
-      otel:
+      - otel
 
   # Tempo runs as user 10001, and docker compose creates the volume as root. As such, we need to chown the volume in order for Tempo to start correctly.
   init:
@@ -108,7 +108,7 @@ services:
     depends_on:
       - otel-collector
     networks:
-      otel:
+      - otel
 
   loki:
     # https://github.com/grafana/loki/releases
@@ -123,7 +123,7 @@ services:
     ports:
       - 3100:3100
     networks:
-      otel:
+      - otel
 
   grafana:
     # https://github.com/grafana/grafana/releases
@@ -146,7 +146,7 @@ services:
       - tempo
       - loki
     networks:
-      otel:
+      - otel
 
   jaeger:
     image: jaegertracing/all-in-one:1.65.0
@@ -154,14 +154,14 @@ services:
     ports:
       - 16686:16686
     networks:
-      otel:
+      - otel
 
   jaeger-agent:
     image: jaegertracing/jaeger-agent:1.62.0
     container_name: jaeger-agent
     command: ['--reporter.grpc.host-port=otel-collector:14250']
     networks:
-      otel:
+      - otel
 
   otel-collector:
     container_name: otel-collector
