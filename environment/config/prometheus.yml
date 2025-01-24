@@ -25,7 +25,6 @@ scrape_configs:
       - targets:
         - otel-collector:8889
         - otel-collector:8888
-
   - job_name: 'dk-sqlserver'
     scrape_interval: 60s
     static_configs:
@@ -42,3 +41,8 @@ scrape_configs:
     static_configs:
       - targets:
         - localhost:9090
+  - job_name: 'node-exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - node-exporter:9100
