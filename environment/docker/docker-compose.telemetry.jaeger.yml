@@ -1,0 +1,29 @@
+# Usage:
+# docker compose --profile otel-all up -d
+# docker compose --profile otel-jaeger up -d
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.65.0
+    container_name: jaeger
+    ports:
+      - 16686:16686
+    networks:
+      - opentelemetry
+    profiles:
+      - otel-all
+      - otel-jaeger
+
+  jaeger-agent:
+    image: jaegertracing/jaeger-agent:1.62.0
+    container_name: jaeger-agent
+    command: ['--reporter.grpc.host-port=otel-collector:14250']
+    networks:
+      - opentelemetry
+    profiles:
+      - otel-all
+      - otel-jaeger
+
+networks:
+  opentelemetry:
+    external: true

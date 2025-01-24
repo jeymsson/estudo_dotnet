@@ -1,0 +1,11 @@
+# Usage:
+# docker compose --profile otel-all up -d
+# docker compose --profile otel-prometheus up -d
+# docker compose --profile otel-grafana up -d
+# docker compose --profile otel-jaeger up -d
+
+include:
+  - ./docker/docker-compose.telemetry.otel.yml
+  - ./docker/docker-compose.telemetry.jaeger.yml
+  - ./docker/docker-compose.telemetry.prometheus.yml
+  - ./docker/docker-compose.telemetry.grafana.yml

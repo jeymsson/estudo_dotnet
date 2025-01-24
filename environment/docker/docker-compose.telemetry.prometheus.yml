@@ -1,0 +1,50 @@
+# Usage:
+# docker compose --profile otel-all up -d
+# docker compose --profile otel-prometheus up -d
+
+services:
+  blackbox:
+    # https://github.com/prometheus/blackbox_exporter/releases
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: blackbox
+    restart: unless-stopped
+    ports:
+      - 9115:9115
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../config/blackbox.yml:/etc/blackbox/blackbox.yml
+    command: --config.file=/etc/blackbox/blackbox.yml
+    networks:
+      - opentelemetry
+    profiles:
+      - otel-all
+      - otel-prometheus
+
+  prometheus:
+    # https://github.com/prometheus/prometheus/releases
+    image: prom/prometheus:v3.1.0
+    container_name: prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+    depends_on:
+      blackbox:
+        condition: "service_started"
+        required: false
+    networks:
+      - opentelemetry
+    profiles:
+      - otel-all
+      - otel-prometheus
+
+networks:
+  opentelemetry:
+    external: true
+
+volumes:
+  prometheus:
