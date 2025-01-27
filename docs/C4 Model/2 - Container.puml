@@ -1,0 +1,15 @@
+@startuml Container
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_LANDSCAPE()
+
+TITLE Container - C4 Model
+
+Person(user, "User", "User that interacts with the system")
+Container(api, "API Backend", ".NET", "API REST to manage the stock catalog, comments and user portfolio")
+ContainerDb(database, "Database", "MSSQL", "Database to store the stock catalog, comments and user portfolio")
+
+Rel(user, api, "Requests HTTP(S)")
+Rel(api, database, "SQL", "Persist data")
+
+@enduml

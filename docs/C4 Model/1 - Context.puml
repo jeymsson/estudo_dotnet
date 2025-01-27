@@ -1,0 +1,13 @@
+@startuml Context
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_LANDSCAPE()
+
+TITLE Context - C4 Model
+
+Person(user, "User", "User that interacts with the system")
+System(api, "API - Stock", "API that manages the stock catalog and comments")
+
+Rel(user, api, "Uses")
+
+@enduml

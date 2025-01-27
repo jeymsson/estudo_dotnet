@@ -1,0 +1,15 @@
+@startuml Component
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+TITLE Component - C4 Model
+
+Container(api, "API Backend", ".NET", "API REST to manage the stock catalog, comments and user portfolio") {
+    Component(controller, "REST Controller", ".NET", "Manage HTTP requests")
+    Component(service, "Service", "Service class", "Business rules")
+    Component(repository, "Repository", "Interface", "Menage database operations")
+}
+
+Rel(controller, service, "Methods call")
+Rel(service, repository, "Persists database")
+
+@enduml

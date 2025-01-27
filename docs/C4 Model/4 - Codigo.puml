@@ -1,0 +1,38 @@
+@startuml Code
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+TITLE Code - C4 Model
+
+class Stock {
+  - _context ApplicationDbContext
+
+  + getAllAsync(QueryObject query) : Task<List<Stock>>
+  + AddAsync(Stock stockModel) : Task<Stock>
+  + UpdateAsync(int id, Stock stockModel) : Task<Stock?>
+  + FindAsync(int id) : Task<Stock?>
+  + DeleteAsync(Stock stockModel) : Task<Stock>
+  + stockExists(int stockId) : Task<bool>
+  + findStockByName(string symbol) : Task<Stock>
+}
+
+class Comment {
+  - _context ApplicationDbContext
+
+  + getAllAsync() : Task<List<Comment>>
+  + AddAsync(Comment commentModel) : Task<Comment>
+  + UpdateAsync(int id, Comment commentModel) : Task<Comment?>
+  + FindAsync(int id) : Task<Comment?>
+  + DeleteAsync(Comment commentModel) : Task<Comment>
+  + stockExists(int stockId) : Task<bool>
+}
+
+class Portfolio {
+  - _context ApplicationDbContext
+
+  + getUserPortfolio(AppUser user) : Task<List<Portfolio>>
+  + createAsync(Portfolio portfolio) : Task<Portfolio>
+  + findPortfolioByStockAsync(Stock stock) : Task<Portfolio>
+  + findPortfolioByIdAsync(string userId, int id) : Task<Portfolio?>
+  + deletePortfolioAsync(Portfolio portfolio) : Task<Portfolio>
+}
+@enduml
