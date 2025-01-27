@@ -3,7 +3,7 @@ COMPOSE_FILE=docker-compose.yml
 COMPOSE_TELEMETRY_FILE=./environment/docker-compose.telemetry.all.yml
 
 # Alvos
-.PHONY: up down create-network destroy rebuild
+.PHONY: up down create-network destroy rebuild restart
 
 # Alvo para criar a rede se não existir
 create-network:
@@ -37,3 +37,9 @@ rebuild:
 	@echo "Reconstruindo os serviços com Docker Compose..."
 	docker-compose -f $(COMPOSE_TELEMETRY_FILE) --profile otel-all \
 					-f $(COMPOSE_FILE) up -d --build
+
+# Alvo para reiniciar os serviços
+restart:
+	@echo "Reiniciando os serviços com Docker Compose..."
+	docker-compose -f $(COMPOSE_TELEMETRY_FILE) --profile otel-all \
+					-f $(COMPOSE_FILE) restart
