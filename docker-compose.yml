@@ -19,11 +19,11 @@ services:
     networks:
       - opentelemetry
 
-  dk-webapplication1:
+  dk-webapplication:
     build:
       context: .
       dockerfile: Dockerfile
-    image: im-webapplication1
+    image: im-webapplication
     container_name: ct-webapplication1
     restart: unless-stopped
     environment:
