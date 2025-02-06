@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace WebApplication1.Tracing;
+namespace WebApplication1.Telemetry.Tracing;
 
 public class AppMetrics
 {

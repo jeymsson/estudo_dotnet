@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 
-namespace WebApplication1.Tracing;
+namespace WebApplication1.Telemetry.Tracing;
 
 public class CustomLogProcessor : BaseProcessor<LogRecord>
 {
